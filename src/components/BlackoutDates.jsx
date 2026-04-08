@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import api from '../api'
 
 export default function BlackoutDates() {
   const [blackoutDates, setBlackoutDates] = useState([])
@@ -25,7 +25,7 @@ export default function BlackoutDates() {
     setError(null)
 
     try {
-      const response = await axios.get('/api/blackout-dates')
+      const response = await api.get('/blackout-dates')
       setBlackoutDates(response.data.data)
     } catch (err) {
       setError(`Failed to load blackout dates: ${err.message}`)
@@ -48,7 +48,7 @@ export default function BlackoutDates() {
     setIsSaving(true)
 
     try {
-      const response = await axios.post('/api/blackout-dates', newBlackout)
+      const response = await api.post('/blackout-dates', newBlackout)
       setBlackoutDates([response.data.data, ...blackoutDates])
       setNewBlackout({ start_date: '', end_date: '', reason: '' })
       setShowAddForm(false)

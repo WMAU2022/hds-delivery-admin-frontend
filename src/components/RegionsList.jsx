@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import api from '../api'
 import RegionCard from './RegionCard'
 
 export default function RegionsList({ onSelectRegion }) {
@@ -23,7 +23,7 @@ export default function RegionsList({ onSelectRegion }) {
     setError(null)
 
     try {
-      const response = await axios.get('/api/regions')
+      const response = await api.get('/regions')
       setRegions(response.data.data || [])
     } catch (err) {
       setError(`Failed to load regions: ${err.message}`)
@@ -37,7 +37,7 @@ export default function RegionsList({ onSelectRegion }) {
   async function handleToggleRegion(regionId, currentStatus) {
     try {
       const endpoint = currentStatus ? 'disable' : 'enable'
-      const response = await axios.put(`/api/regions/${regionId}/${endpoint}`)
+      const response = await api.put(`/regions/${regionId}/${endpoint}`)
 
       // Update local state
       setRegions(
@@ -94,8 +94,8 @@ export default function RegionsList({ onSelectRegion }) {
 
     try {
       const endpoint =
-        action === 'enable' ? '/api/regions/bulk/enable' : '/api/regions/bulk/disable'
-      await axios.post(endpoint, { ids })
+        action === 'enable' ? '/regions/bulk/enable' : '/regions/bulk/disable'
+      await api.post(endpoint, { ids })
 
       // Update local state
       setRegions(

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import api from '../api'
 
 export default function SuburbsList({ regions }) {
   const [suburbs, setSuburbs] = useState([])
@@ -34,7 +34,7 @@ export default function SuburbsList({ regions }) {
       if (searchTerm) params.append('search', searchTerm)
       if (selectedRegionFilter) params.append('regionId', selectedRegionFilter)
 
-      const response = await axios.get(`/api/suburbs?${params}`)
+      const response = await api.get(`/suburbs?${params}`)
       setSuburbs(response.data.data || [])
       setPagination(response.data.pagination || {})
     } catch (err) {
@@ -72,7 +72,7 @@ export default function SuburbsList({ regions }) {
 
     try {
       const ids = Array.from(selectedIds)
-      await axios.post('/api/suburbs/bulk/assign-region', {
+      await api.post('/suburbs/bulk/assign-region', {
         ids,
         region_id: parseInt(bulkRegionId),
       })
@@ -94,7 +94,7 @@ export default function SuburbsList({ regions }) {
     if (!confirm('Are you sure you want to delete this suburb?')) return
 
     try {
-      await axios.delete(`/api/suburbs/${suburbId}`)
+      await api.delete(`/suburbs/${suburbId}`)
       setSuccess('Suburb deleted')
       await fetchSuburbs()
       setTimeout(() => setSuccess(null), 3000)
@@ -130,7 +130,7 @@ export default function SuburbsList({ regions }) {
           }
         }
 
-        const response = await axios.post('/api/suburbs/import', { suburbs })
+        const response = await api.post('/suburbs/import', { suburbs })
         setSuccess(
           `Imported ${response.data.inserted} suburbs, skipped ${response.data.skipped}`
         )
