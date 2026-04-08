@@ -18,7 +18,7 @@ export default function RegionDetail({ regionId, onBack }) {
     cutoff_day: 'Monday',
     pack_day: 'Tuesday',
     delivery_day: 'Friday',
-    hours: 'AM',
+    hours: '', // Empty until user selects
     enabled: true,
     is_default: false,
   })
@@ -48,8 +48,8 @@ export default function RegionDetail({ regionId, onBack }) {
   }
 
   async function handleAddSchedule() {
-    if (!newSchedule.cutoff_day || !newSchedule.pack_day || !newSchedule.delivery_day || !newSchedule.hours) {
-      setError('Please fill all fields')
+    if (!newSchedule.cutoff_day || !newSchedule.pack_day || !newSchedule.delivery_day || !newSchedule.hours || newSchedule.hours.trim() === '') {
+      setError('Please select days and at least one delivery window')
       return
     }
 
@@ -71,7 +71,7 @@ export default function RegionDetail({ regionId, onBack }) {
         cutoff_day: 'Monday',
         pack_day: 'Tuesday',
         delivery_day: 'Friday',
-        hours: 'AM',
+        hours: '',
         enabled: true,
         is_default: false,
       })
@@ -272,26 +272,48 @@ export default function RegionDetail({ regionId, onBack }) {
                 </div>
                 <div className="schedule-footer">
                   <div className="schedule-hours" style={{ flex: 1 }}>
-                    <label>Delivery Window</label>
+                    <label>Delivery Windows (select one or both)</label>
                     <div style={{ display: 'flex', gap: '15px', marginTop: '8px', fontSize: '13px' }}>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, fontWeight: 'normal' }}>
                         <input 
-                          type="radio" 
-                          name={`hours-${schedule.id}`} 
-                          value="AM" 
-                          checked={schedule.hours === 'AM'} 
-                          onChange={(e) => handleScheduleUpdate(schedule.id, { hours: e.target.value })} 
+                          type="checkbox" 
+                          checked={schedule.hours && (schedule.hours === 'AM' || schedule.hours.includes('AM'))} 
+                          onChange={(e) => {
+                            let newHours = schedule.hours || '';
+                            const hasAM = newHours.includes('AM');
+                            const hasBH = newHours.includes('Business Hours');
+                            
+                            if (e.target.checked && !hasAM) {
+                              // Add AM
+                              newHours = hasBH ? 'AM,Business Hours' : 'AM';
+                            } else if (!e.target.checked && hasAM) {
+                              // Remove AM
+                              newHours = hasBH ? 'Business Hours' : '';
+                            }
+                            handleScheduleUpdate(schedule.id, { hours: newHours });
+                          }}
                           style={{ width: '16px', height: '16px', cursor: 'pointer' }} 
                         />
                         AM (12:00 AM - 7:00 AM)
                       </label>
                       <label style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, fontWeight: 'normal' }}>
                         <input 
-                          type="radio" 
-                          name={`hours-${schedule.id}`} 
-                          value="Business Hours" 
-                          checked={schedule.hours === 'Business Hours'} 
-                          onChange={(e) => handleScheduleUpdate(schedule.id, { hours: e.target.value })} 
+                          type="checkbox" 
+                          checked={schedule.hours && (schedule.hours === 'Business Hours' || schedule.hours.includes('Business Hours'))} 
+                          onChange={(e) => {
+                            let newHours = schedule.hours || '';
+                            const hasAM = newHours.includes('AM');
+                            const hasBH = newHours.includes('Business Hours');
+                            
+                            if (e.target.checked && !hasBH) {
+                              // Add Business Hours
+                              newHours = hasAM ? 'AM,Business Hours' : 'Business Hours';
+                            } else if (!e.target.checked && hasBH) {
+                              // Remove Business Hours
+                              newHours = hasAM ? 'AM' : '';
+                            }
+                            handleScheduleUpdate(schedule.id, { hours: newHours });
+                          }}
                           style={{ width: '16px', height: '16px', cursor: 'pointer' }} 
                         />
                         Business Hours (8:00 AM - 6:00 PM)
@@ -324,14 +346,30 @@ export default function RegionDetail({ regionId, onBack }) {
             </div>
             <div className="schedule-footer">
               <div className="schedule-hours" style={{ flex: 1 }}>
-                <label>Delivery Window</label>
+                <label>Delivery Windows (select one or both)</label>
                 <div style={{ display: 'flex', gap: '15px', marginTop: '8px' }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, fontWeight: 'normal' }}>
-                    <input type="radio" name="hours" value="AM" checked={newSchedule.hours === 'AM'} onChange={(e) => setNewSchedule({ ...newSchedule, hours: e.target.value })} style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
+                    <input type="checkbox" checked={newSchedule.hours && newSchedule.hours.includes('AM')} onChange={(e) => {
+                      let hours = newSchedule.hours || '';
+                      if (e.target.checked) {
+                        hours = hours ? 'AM,Business Hours' : 'AM';
+                      } else {
+                        hours = hours.replace('AM,', '').replace(',AM', '').replace('AM', '');
+                      }
+                      setNewSchedule({ ...newSchedule, hours })
+                    }} style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
                     AM (12:00 AM - 7:00 AM)
                   </label>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, fontWeight: 'normal' }}>
-                    <input type="radio" name="hours" value="Business Hours" checked={newSchedule.hours === 'Business Hours'} onChange={(e) => setNewSchedule({ ...newSchedule, hours: e.target.value })} style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
+                    <input type="checkbox" checked={newSchedule.hours && newSchedule.hours.includes('Business Hours')} onChange={(e) => {
+                      let hours = newSchedule.hours || '';
+                      if (e.target.checked) {
+                        hours = hours ? 'AM,Business Hours' : 'Business Hours';
+                      } else {
+                        hours = hours.replace('AM,', '').replace(',AM', '').replace('Business Hours', '');
+                      }
+                      setNewSchedule({ ...newSchedule, hours })
+                    }} style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
                     Business Hours (8:00 AM - 6:00 PM)
                   </label>
                 </div>
