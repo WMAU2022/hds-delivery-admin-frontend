@@ -338,11 +338,14 @@ export default function RegionDetail({ regionId, onBack }) {
 
   async function handleScheduleUpdate(scheduleId, updates) {
     try {
+      // Make the API call
       const response = await api.put(`/schedules/${scheduleId}`, updates)
-      // Refetch the schedule to get the properly formatted response with day names
+      // Use the API response to update local state
       const updatedSchedule = response.data
-      setSchedules(schedules.map(s => s.id === scheduleId ? updatedSchedule : s))
-      setSuccess('Updated')
+      setSchedules(prevSchedules => 
+        prevSchedules.map(s => s.id === scheduleId ? updatedSchedule : s)
+      )
+      setSuccess('✓ Saved')
       setTimeout(() => setSuccess(null), 2000)
     } catch (err) {
       setError(`Update failed: ${err.message}`)
