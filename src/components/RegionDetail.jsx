@@ -18,12 +18,9 @@ export default function RegionDetail({ regionId, onBack }) {
     cutoff_day: 'Monday',
     pack_day: 'Tuesday',
     delivery_day: 'Friday',
-    has_am: true,
-    has_business_hours: false,
-    am_time_start: '12:00 AM',
-    am_time_end: '7:00 AM',
-    business_hours_start: '8:00 AM',
-    business_hours_end: '6:00 PM',
+    hours: 'AM',
+    enabled: true,
+    is_default: false,
   })
 
   useEffect(() => {
@@ -35,24 +32,24 @@ export default function RegionDetail({ regionId, onBack }) {
     setError(null)
 
     try {
+      // Fetch region
       const regionRes = await api.get(`/regions/${regionId}`)
-      setRegion(regionRes.data.data)
-      setSchedules(regionRes.data.data.schedules || [])
+      setRegion(regionRes.data.data || regionRes.data)
+      
+      // Fetch schedules for this region
+      const schedulesRes = await api.get(`/regions/${regionId}/schedules`)
+      setSchedules(schedulesRes.data.data || [])
     } catch (err) {
       setError(`Failed to load region: ${err.message}`)
+      console.error('Fetch error:', err)
     } finally {
       setLoading(false)
     }
   }
 
   async function handleAddSchedule() {
-    if (!newSchedule.cutoff_day || !newSchedule.pack_day || !newSchedule.delivery_day) {
+    if (!newSchedule.cutoff_day || !newSchedule.pack_day || !newSchedule.delivery_day || !newSchedule.hours) {
       setError('Please fill all fields')
-      return
-    }
-
-    if (!newSchedule.has_am && !newSchedule.has_business_hours) {
-      setError('Select at least one delivery option')
       return
     }
 
@@ -61,26 +58,29 @@ export default function RegionDetail({ regionId, onBack }) {
     try {
       const response = await api.post('/schedules', {
         region_id: regionId,
-        ...newSchedule,
+        cutoff_day: newSchedule.cutoff_day,
+        pack_day: newSchedule.pack_day,
+        delivery_day: newSchedule.delivery_day,
+        hours: newSchedule.hours,
+        enabled: newSchedule.enabled,
+        is_default: newSchedule.is_default,
       })
 
-      setSchedules([...schedules, response.data.data])
+      setSchedules([...schedules, response.data])
       setNewSchedule({
         cutoff_day: 'Monday',
         pack_day: 'Tuesday',
         delivery_day: 'Friday',
-        has_am: true,
-        has_business_hours: false,
-        am_time_start: '12:00 AM',
-        am_time_end: '7:00 AM',
-        business_hours_start: '8:00 AM',
-        business_hours_end: '6:00 PM',
+        hours: 'AM',
+        enabled: true,
+        is_default: false,
       })
       setShowAddForm(false)
-      setSuccess('Schedule added')
+      setSuccess('✅ Schedule added!')
       setTimeout(() => setSuccess(null), 3000)
     } catch (err) {
       setError(`Failed to add schedule: ${err.message}`)
+      console.error('Add schedule error:', err)
     } finally {
       setIsSaving(false)
     }
@@ -245,9 +245,7 @@ export default function RegionDetail({ regionId, onBack }) {
                 <div className="schedule-flow">
                   <div className="flow-item">
                     <label>Cutoff Day</label>
-                    <select value={schedule.cutoff_day} onChange={(e) => {
-                      const updated = schedules.map(s => s.id === schedule.id ? { ...s, cutoff_day: e.target.value } : s)
-                      setSchedules(updated)
+                    <select value={schedule.cutoff_day_name || schedule.cutoff_day} onChange={(e) => {
                       handleScheduleUpdate(schedule.id, { cutoff_day: e.target.value })
                     }}>
                       {DAYS.map(day => (<option key={day} value={day}>{day}</option>))}
@@ -256,9 +254,7 @@ export default function RegionDetail({ regionId, onBack }) {
                   <div className="flow-arrow">→</div>
                   <div className="flow-item">
                     <label>Pack Day</label>
-                    <select value={schedule.pack_day} onChange={(e) => {
-                      const updated = schedules.map(s => s.id === schedule.id ? { ...s, pack_day: e.target.value } : s)
-                      setSchedules(updated)
+                    <select value={schedule.pack_day_name || schedule.pack_day} onChange={(e) => {
                       handleScheduleUpdate(schedule.id, { pack_day: e.target.value })
                     }}>
                       {DAYS.map(day => (<option key={day} value={day}>{day}</option>))}
@@ -267,9 +263,7 @@ export default function RegionDetail({ regionId, onBack }) {
                   <div className="flow-arrow">→</div>
                   <div className="flow-item">
                     <label>Delivery Day</label>
-                    <select value={schedule.delivery_day} onChange={(e) => {
-                      const updated = schedules.map(s => s.id === schedule.id ? { ...s, delivery_day: e.target.value } : s)
-                      setSchedules(updated)
+                    <select value={schedule.delivery_day_name || schedule.delivery_day} onChange={(e) => {
                       handleScheduleUpdate(schedule.id, { delivery_day: e.target.value })
                     }}>
                       {DAYS.map(day => (<option key={day} value={day}>{day}</option>))}
@@ -278,16 +272,13 @@ export default function RegionDetail({ regionId, onBack }) {
                 </div>
                 <div className="schedule-footer">
                   <div className="schedule-hours" style={{ flex: 1 }}>
-                    <label>Delivery Windows</label>
-                    <div style={{ display: 'flex', gap: '25px', marginTop: '8px', fontSize: '13px' }}>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, fontWeight: 'normal' }}>
-                        <input type="checkbox" checked={schedule.has_am || false} onChange={(e) => handleScheduleUpdate(schedule.id, { has_am: e.target.checked })} style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
-                        AM <span style={{ color: '#999', fontSize: '12px' }}>(12:00 AM - 7:00 AM)</span>
-                      </label>
-                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, fontWeight: 'normal' }}>
-                        <input type="checkbox" checked={schedule.has_business_hours || false} onChange={(e) => handleScheduleUpdate(schedule.id, { has_business_hours: e.target.checked })} style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
-                        Business Hours <span style={{ color: '#999', fontSize: '12px' }}>(8:00 AM - 6:00 PM)</span>
-                      </label>
+                    <label>Delivery Window</label>
+                    <div style={{ marginTop: '8px', fontSize: '13px' }}>
+                      <strong style={{ color: '#333' }}>{schedule.hours || 'Not set'}</strong> 
+                      <span style={{ color: '#999', marginLeft: '10px', fontSize: '12px' }}>
+                        {schedule.hours === 'AM' && '(12:00 AM - 7:00 AM)'}
+                        {schedule.hours === 'Business Hours' && '(8:00 AM - 6:00 PM)'}
+                      </span>
                     </div>
                   </div>
                   <div className="schedule-actions">
@@ -316,19 +307,24 @@ export default function RegionDetail({ regionId, onBack }) {
             </div>
             <div className="schedule-footer">
               <div className="schedule-hours" style={{ flex: 1 }}>
-                <label>Delivery Windows</label>
-                <div style={{ display: 'flex', gap: '25px', marginTop: '8px', fontSize: '13px' }}>
+                <label>Delivery Window</label>
+                <div style={{ display: 'flex', gap: '15px', marginTop: '8px' }}>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, fontWeight: 'normal' }}>
-                    <input type="checkbox" checked={newSchedule.has_am} onChange={(e) => setNewSchedule({ ...newSchedule, has_am: e.target.checked })} style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
-                    AM <span style={{ color: '#999', fontSize: '12px' }}>(12:00 AM - 7:00 AM)</span>
+                    <input type="radio" name="hours" value="AM" checked={newSchedule.hours === 'AM'} onChange={(e) => setNewSchedule({ ...newSchedule, hours: e.target.value })} style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
+                    AM (12:00 AM - 7:00 AM)
                   </label>
                   <label style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, fontWeight: 'normal' }}>
-                    <input type="checkbox" checked={newSchedule.has_business_hours} onChange={(e) => setNewSchedule({ ...newSchedule, has_business_hours: e.target.checked })} style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
-                    Business Hours <span style={{ color: '#999', fontSize: '12px' }}>(8:00 AM - 6:00 PM)</span>
+                    <input type="radio" name="hours" value="Business Hours" checked={newSchedule.hours === 'Business Hours'} onChange={(e) => setNewSchedule({ ...newSchedule, hours: e.target.value })} style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
+                    Business Hours (8:00 AM - 6:00 PM)
                   </label>
                 </div>
               </div>
-              <div className="schedule-actions"><button className="btn btn-primary btn-small" onClick={handleAddSchedule} disabled={isSaving}>✓ Add</button><button className="btn btn-secondary btn-small" onClick={() => setShowAddForm(false)}>✕ Cancel</button></div>
+              <div className="schedule-actions">
+                <button className="btn btn-primary btn-small" onClick={handleAddSchedule} disabled={isSaving} style={{ backgroundColor: '#28a745', borderColor: '#28a745' }}>
+                  {isSaving ? 'Saving...' : '✓ Save Schedule'}
+                </button>
+                <button className="btn btn-secondary btn-small" onClick={() => setShowAddForm(false)}>✕ Cancel</button>
+              </div>
             </div>
           </div>
         )}
