@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
+import api from '../api'
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
 
@@ -35,7 +35,7 @@ export default function RegionDetail({ regionId, onBack }) {
     setError(null)
 
     try {
-      const regionRes = await axios.get(`/api/regions/${regionId}`)
+      const regionRes = await api.get(`/regions/${regionId}`)
       setRegion(regionRes.data.data)
       setSchedules(regionRes.data.data.schedules || [])
     } catch (err) {
@@ -59,7 +59,7 @@ export default function RegionDetail({ regionId, onBack }) {
     setIsSaving(true)
 
     try {
-      const response = await axios.post('/api/schedules', {
+      const response = await api.post('/schedules', {
         region_id: regionId,
         ...newSchedule,
       })
@@ -88,7 +88,7 @@ export default function RegionDetail({ regionId, onBack }) {
 
   async function handleToggleSchedule(scheduleId) {
     try {
-      const response = await axios.put(`/api/schedules/${scheduleId}/toggle`)
+      const response = await api.put(`/schedules/${scheduleId}/toggle`)
       setSchedules(schedules.map(s => (s.id === scheduleId ? response.data.data : s)))
       setSuccess('Schedule toggled')
       setTimeout(() => setSuccess(null), 3000)
@@ -101,7 +101,7 @@ export default function RegionDetail({ regionId, onBack }) {
     setIsSaving(true)
 
     try {
-      await axios.put(`/api/schedules/${regionId}/set-default/${scheduleId}`)
+      await api.put(`/schedules/${regionId}/set-default/${scheduleId}`)
       setSchedules(
         schedules.map(s => ({
           ...s,
@@ -121,7 +121,7 @@ export default function RegionDetail({ regionId, onBack }) {
     if (!confirm('Delete this schedule?')) return
 
     try {
-      await axios.delete(`/api/schedules/${scheduleId}`)
+      await api.delete(`/schedules/${scheduleId}`)
       setSchedules(schedules.filter(s => s.id !== scheduleId))
       setSuccess('Schedule deleted')
       setTimeout(() => setSuccess(null), 3000)
@@ -134,7 +134,7 @@ export default function RegionDetail({ regionId, onBack }) {
     setIsSaving(true)
 
     try {
-      await axios.put(`/api/regions/${regionId}`, cutoffEdit)
+      await api.put(`/regions/${regionId}`, cutoffEdit)
       setRegion({ ...region, ...cutoffEdit })
       setShowCutoffEdit(false)
       setSuccess('Cutoff settings saved')
@@ -342,7 +342,7 @@ export default function RegionDetail({ regionId, onBack }) {
 
   async function handleScheduleUpdate(scheduleId, updates) {
     try {
-      await axios.put(`/api/schedules/${scheduleId}`, updates)
+      await api.put(`/schedules/${scheduleId}`, updates)
       setSchedules(schedules.map(s => s.id === scheduleId ? { ...s, ...updates } : s))
       setSuccess('Updated')
       setTimeout(() => setSuccess(null), 2000)
