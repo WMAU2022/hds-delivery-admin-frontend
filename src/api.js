@@ -8,9 +8,9 @@ const BACKEND_URL = import.meta.env.VITE_API_URL ||
 
 console.log('📡 API Backend URL:', BACKEND_URL)
 
-// Create axios instance with backend URL
+// Create axios instance with backend URL (include /api in baseURL)
 const api = axios.create({
-  baseURL: BACKEND_URL,
+  baseURL: `${BACKEND_URL}/api`,
   headers: {
     'Content-Type': 'application/json',
   },
