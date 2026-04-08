@@ -273,12 +273,29 @@ export default function RegionDetail({ regionId, onBack }) {
                 <div className="schedule-footer">
                   <div className="schedule-hours" style={{ flex: 1 }}>
                     <label>Delivery Window</label>
-                    <div style={{ marginTop: '8px', fontSize: '13px' }}>
-                      <strong style={{ color: '#333' }}>{schedule.hours || 'Not set'}</strong> 
-                      <span style={{ color: '#999', marginLeft: '10px', fontSize: '12px' }}>
-                        {schedule.hours === 'AM' && '(12:00 AM - 7:00 AM)'}
-                        {schedule.hours === 'Business Hours' && '(8:00 AM - 6:00 PM)'}
-                      </span>
+                    <div style={{ display: 'flex', gap: '15px', marginTop: '8px', fontSize: '13px' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, fontWeight: 'normal' }}>
+                        <input 
+                          type="radio" 
+                          name={`hours-${schedule.id}`} 
+                          value="AM" 
+                          checked={schedule.hours === 'AM'} 
+                          onChange={(e) => handleScheduleUpdate(schedule.id, { hours: e.target.value })} 
+                          style={{ width: '16px', height: '16px', cursor: 'pointer' }} 
+                        />
+                        AM (12:00 AM - 7:00 AM)
+                      </label>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: 0, fontWeight: 'normal' }}>
+                        <input 
+                          type="radio" 
+                          name={`hours-${schedule.id}`} 
+                          value="Business Hours" 
+                          checked={schedule.hours === 'Business Hours'} 
+                          onChange={(e) => handleScheduleUpdate(schedule.id, { hours: e.target.value })} 
+                          style={{ width: '16px', height: '16px', cursor: 'pointer' }} 
+                        />
+                        Business Hours (8:00 AM - 6:00 PM)
+                      </label>
                     </div>
                   </div>
                   <div className="schedule-actions">
