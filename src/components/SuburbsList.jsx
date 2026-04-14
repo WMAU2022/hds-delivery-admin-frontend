@@ -273,7 +273,7 @@ export default function SuburbsList({ regions }) {
                     <td>{suburb.state}</td>
                     <td>
                       <span className="region-badge">
-                        {getRegionName(suburb.region_id)}
+                        {suburb.region_name || 'Unassigned'}
                       </span>
                     </td>
                     <td style={{ fontSize: '12px', color: '#666' }}>
