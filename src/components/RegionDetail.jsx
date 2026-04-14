@@ -66,7 +66,8 @@ export default function RegionDetail({ regionId, onBack }) {
         is_default: newSchedule.is_default,
       })
 
-      setSchedules([...schedules, response.data])
+      const newScheduleData = response.data.data || response.data
+      setSchedules([...schedules, newScheduleData])
       setNewSchedule({
         cutoff_day: 'Monday',
         pack_day: 'Tuesday',
@@ -89,7 +90,8 @@ export default function RegionDetail({ regionId, onBack }) {
   async function handleToggleSchedule(scheduleId) {
     try {
       const response = await api.put(`/schedules/${scheduleId}/toggle`)
-      setSchedules(schedules.map(s => (s.id === scheduleId ? response.data.data : s)))
+      const updatedSchedule = response.data.data || response.data
+      setSchedules(schedules.map(s => (s.id === scheduleId ? updatedSchedule : s)))
       setSuccess('Schedule toggled')
       setTimeout(() => setSuccess(null), 3000)
     } catch (err) {
@@ -101,7 +103,8 @@ export default function RegionDetail({ regionId, onBack }) {
     setIsSaving(true)
 
     try {
-      await api.put(`/schedules/${regionId}/set-default/${scheduleId}`)
+      const response = await api.put(`/schedules/${regionId}/set-default/${scheduleId}`)
+      // Update schedules to reflect default change
       setSchedules(
         schedules.map(s => ({
           ...s,
@@ -396,7 +399,7 @@ export default function RegionDetail({ regionId, onBack }) {
       // Make the API call
       const response = await api.put(`/schedules/${scheduleId}`, updates)
       // Use the API response to update local state
-      const updatedSchedule = response.data
+      const updatedSchedule = response.data.data || response.data
       setSchedules(prevSchedules => 
         prevSchedules.map(s => s.id === scheduleId ? updatedSchedule : s)
       )
