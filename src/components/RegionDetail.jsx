@@ -11,8 +11,10 @@ export default function RegionDetail({ regionId, onBack }) {
   const [success, setSuccess] = useState(null)
   const [showAddForm, setShowAddForm] = useState(false)
   const [showCutoffEdit, setShowCutoffEdit] = useState(false)
+  const [showLocationEdit, setShowLocationEdit] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [cutoffEdit, setCutoffEdit] = useState({})
+  const [locationEdit, setLocationEdit] = useState({})
 
   const [newSchedule, setNewSchedule] = useState({
     cutoff_day: 'Monday',
@@ -149,6 +151,22 @@ export default function RegionDetail({ regionId, onBack }) {
     }
   }
 
+  async function handleSaveLocation() {
+    setIsSaving(true)
+
+    try {
+      await api.put(`/regions/${regionId}`, locationEdit)
+      setRegion({ ...region, ...locationEdit })
+      setShowLocationEdit(false)
+      setSuccess('Location saved')
+      setTimeout(() => setSuccess(null), 3000)
+    } catch (err) {
+      setError(`Failed to save location: ${err.message}`)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="screen">
@@ -233,6 +251,52 @@ export default function RegionDetail({ regionId, onBack }) {
             <div style={{ display: 'flex', gap: '10px', marginTop: '12px', justifyContent: 'flex-end' }}>
               <button className="btn btn-primary btn-small" onClick={handleSaveCutoff} disabled={isSaving}>✓ Save</button>
               <button className="btn btn-secondary btn-small" onClick={() => setShowCutoffEdit(false)}>✕ Cancel</button>
+            </div>
+          </div>
+        )}
+
+        {/* Location Field - At Top, Applies to All Orders */}
+        {!showLocationEdit ? (
+          <div style={{ background: '#e8f5e9', border: '2px solid #4caf50', borderRadius: '8px', padding: '15px', marginBottom: '20px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '20px', justifyContent: 'space-between' }}>
+              <div>
+                <strong style={{ color: '#4caf50', fontSize: '14px' }}>📍 Location</strong>
+                <p style={{ margin: '6px 0 0 0', color: '#333', fontSize: '13px' }}>
+                  <strong>{region.location || '(Not set)'}</strong> applies to all orders from this region
+                </p>
+              </div>
+              <button
+                className="btn btn-primary btn-small"
+                onClick={() => {
+                  setLocationEdit({
+                    location: region.location || '',
+                  })
+                  setShowLocationEdit(true)
+                }}
+                style={{ height: 'fit-content' }}
+              >
+                Edit Location
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div style={{ background: '#fffacd', border: '2px solid #ffd700', borderRadius: '8px', padding: '15px', marginBottom: '20px' }}>
+            <strong style={{ color: '#b8860b', fontSize: '14px' }}>📍 Edit Location</strong>
+            <div style={{ display: 'flex', gap: '15px', marginTop: '12px', alignItems: 'flex-end' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', fontWeight: '600', marginBottom: '6px', fontSize: '13px' }}>Location (e.g., WOM, IKU)</label>
+                <input
+                  type="text"
+                  value={locationEdit.location}
+                  onChange={(e) => setLocationEdit({ ...locationEdit, location: e.target.value })}
+                  placeholder="Enter location (WOM)"
+                  style={{ width: '100%', padding: '8px', border: '1px solid #e0e0e0', borderRadius: '4px' }}
+                />
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '12px', justifyContent: 'flex-end' }}>
+              <button className="btn btn-primary btn-small" onClick={handleSaveLocation} disabled={isSaving}>✓ Save</button>
+              <button className="btn btn-secondary btn-small" onClick={() => setShowLocationEdit(false)}>✕ Cancel</button>
             </div>
           </div>
         )}
