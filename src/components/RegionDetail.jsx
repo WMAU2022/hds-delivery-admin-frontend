@@ -133,6 +133,23 @@ export default function RegionDetail({ regionId, onBack }) {
     }
   }
 
+  async function handleScheduleUpdate(scheduleId, updates) {
+    try {
+      // Make the API call
+      const response = await api.put(`/schedules/${scheduleId}`, updates)
+      // Use the API response to update local state
+      const updatedSchedule = response.data.data || response.data
+      setSchedules(prevSchedules => 
+        prevSchedules.map(s => s.id === scheduleId ? updatedSchedule : s)
+      )
+      setSuccess('✓ Saved')
+      setTimeout(() => setSuccess(null), 2000)
+    } catch (err) {
+      setError(`Update failed: ${err.message}`)
+      console.error('Update error:', err)
+    }
+  }
+
   async function handleSaveCutoff() {
     setIsSaving(true)
 
@@ -393,21 +410,4 @@ export default function RegionDetail({ regionId, onBack }) {
       </div>
     </div>
   )
-
-  async function handleScheduleUpdate(scheduleId, updates) {
-    try {
-      // Make the API call
-      const response = await api.put(`/schedules/${scheduleId}`, updates)
-      // Use the API response to update local state
-      const updatedSchedule = response.data.data || response.data
-      setSchedules(prevSchedules => 
-        prevSchedules.map(s => s.id === scheduleId ? updatedSchedule : s)
-      )
-      setSuccess('✓ Saved')
-      setTimeout(() => setSuccess(null), 2000)
-    } catch (err) {
-      setError(`Update failed: ${err.message}`)
-      console.error('Update error:', err)
-    }
-  }
 }
