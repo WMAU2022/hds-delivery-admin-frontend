@@ -1,7 +1,21 @@
 import React, { useState, useEffect } from 'react'
 import api from '../api'
 
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+const DAY_MAP = { 'Sunday': 0, 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6 }
+const REVERSE_DAY_MAP = { 0: 'Sunday', 1: 'Monday', 2: 'Tuesday', 3: 'Wednesday', 4: 'Thursday', 5: 'Friday', 6: 'Saturday' }
+
+// Helper to convert day number to name
+function getDayName(dayNum) {
+  if (typeof dayNum === 'string') return dayNum; // Already a name
+  return REVERSE_DAY_MAP[dayNum] || 'Monday';
+}
+
+// Helper to convert day name to number
+function getDayNumber(dayName) {
+  if (typeof dayName === 'number') return dayName; // Already a number
+  return DAY_MAP[dayName] || 1;
+}
 
 export default function RegionDetail({ regionId, onBack }) {
   const [region, setRegion] = useState(null)
@@ -167,19 +181,25 @@ export default function RegionDetail({ regionId, onBack }) {
     }
   }
 
-  async function handleScheduleUpdate(scheduleId, updates) {
+  function handleScheduleUpdate(scheduleId, updates) {
     setIsSaving(true)
 
     try {
-      const response = await api.put(`/schedules/${scheduleId}`, updates)
-      const updatedSchedule = response.data.data || response.data
-      setSchedules(schedules.map(s => (s.id === scheduleId ? updatedSchedule : s)))
-      setSuccess('✅ Schedule updated!')
-      setTimeout(() => setSuccess(null), 3000)
+      const response = api.put(`/schedules/${scheduleId}`, updates)
+      response.then(res => {
+        const updatedSchedule = res.data.data || res.data
+        setSchedules(schedules.map(s => (s.id === scheduleId ? updatedSchedule : s)))
+        setSuccess('✅ Schedule updated!')
+        setTimeout(() => setSuccess(null), 3000)
+      }).catch(err => {
+        setError(`Failed to update schedule: ${err.message}`)
+        console.error('Update schedule error:', err)
+      }).finally(() => {
+        setIsSaving(false)
+      })
     } catch (err) {
       setError(`Failed to update schedule: ${err.message}`)
       console.error('Update schedule error:', err)
-    } finally {
       setIsSaving(false)
     }
   }
@@ -329,7 +349,7 @@ export default function RegionDetail({ regionId, onBack }) {
                 <div className="schedule-flow">
                   <div className="flow-item">
                     <label>Cutoff Day</label>
-                    <select value={schedule.cutoff_day_name || schedule.cutoff_day} onChange={(e) => {
+                    <select value={getDayName(schedule.cutoff_day)} onChange={(e) => {
                       handleScheduleUpdate(schedule.id, { cutoff_day: e.target.value })
                     }}>
                       {DAYS.map(day => (<option key={day} value={day}>{day}</option>))}
@@ -338,7 +358,7 @@ export default function RegionDetail({ regionId, onBack }) {
                   <div className="flow-arrow">→</div>
                   <div className="flow-item">
                     <label>Pack Day</label>
-                    <select value={schedule.pack_day_name || schedule.pack_day} onChange={(e) => {
+                    <select value={getDayName(schedule.pack_day)} onChange={(e) => {
                       handleScheduleUpdate(schedule.id, { pack_day: e.target.value })
                     }}>
                       {DAYS.map(day => (<option key={day} value={day}>{day}</option>))}
@@ -347,7 +367,7 @@ export default function RegionDetail({ regionId, onBack }) {
                   <div className="flow-arrow">→</div>
                   <div className="flow-item">
                     <label>Delivery Day</label>
-                    <select value={schedule.delivery_day_name || schedule.delivery_day} onChange={(e) => {
+                    <select value={getDayName(schedule.delivery_day)} onChange={(e) => {
                       handleScheduleUpdate(schedule.id, { delivery_day: e.target.value })
                     }}>
                       {DAYS.map(day => (<option key={day} value={day}>{day}</option>))}
@@ -475,20 +495,5 @@ export default function RegionDetail({ regionId, onBack }) {
     </div>
   )
 
-  async function handleScheduleUpdate(scheduleId, updates) {
-    try {
-      // Make the API call
-      const response = await api.put(`/schedules/${scheduleId}`, updates)
-      // Use the API response to update local state
-      const updatedSchedule = response.data.data || response.data
-      setSchedules(prevSchedules => 
-        prevSchedules.map(s => s.id === scheduleId ? updatedSchedule : s)
-      )
-      setSuccess('✓ Saved')
-      setTimeout(() => setSuccess(null), 2000)
-    } catch (err) {
-      setError(`Update failed: ${err.message}`)
-      console.error('Update error:', err)
-    }
-  }
+
 }
