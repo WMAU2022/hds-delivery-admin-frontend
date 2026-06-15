@@ -167,6 +167,23 @@ export default function RegionDetail({ regionId, onBack }) {
     }
   }
 
+  async function handleScheduleUpdate(scheduleId, updates) {
+    setIsSaving(true)
+
+    try {
+      const response = await api.put(`/schedules/${scheduleId}`, updates)
+      const updatedSchedule = response.data.data || response.data
+      setSchedules(schedules.map(s => (s.id === scheduleId ? updatedSchedule : s)))
+      setSuccess('✅ Schedule updated!')
+      setTimeout(() => setSuccess(null), 3000)
+    } catch (err) {
+      setError(`Failed to update schedule: ${err.message}`)
+      console.error('Update schedule error:', err)
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   if (loading) {
     return (
       <div className="screen">
