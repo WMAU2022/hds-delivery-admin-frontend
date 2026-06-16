@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react'
 import api from '../api'
 
 const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+const DAY_TO_NUM = { 'Monday': 1, 'Tuesday': 2, 'Wednesday': 3, 'Thursday': 4, 'Friday': 5, 'Saturday': 6, 'Sunday': 0 }
+const NUM_TO_DAY = { 0: 'Sunday', 1: 'Monday', 2: 'Tuesday', 3: 'Wednesday', 4: 'Thursday', 5: 'Friday', 6: 'Saturday' }
 
 export default function RegionDetail({ regionId, onBack }) {
   const [region, setRegion] = useState(null)
@@ -265,7 +267,7 @@ export default function RegionDetail({ regionId, onBack }) {
                 <div className="schedule-flow">
                   <div className="flow-item">
                     <label>Cutoff Day</label>
-                    <select value={schedule.cutoff_day_name || schedule.cutoff_day} onChange={(e) => {
+                    <select value={schedule.cutoff_day_name || NUM_TO_DAY[schedule.cutoff_day] || schedule.cutoff_day} onChange={(e) => {
                       handleScheduleUpdate(schedule.id, { cutoff_day: e.target.value })
                     }}>
                       {DAYS.map(day => (<option key={day} value={day}>{day}</option>))}
@@ -274,7 +276,7 @@ export default function RegionDetail({ regionId, onBack }) {
                   <div className="flow-arrow">→</div>
                   <div className="flow-item">
                     <label>Pack Day</label>
-                    <select value={schedule.pack_day_name || schedule.pack_day} onChange={(e) => {
+                    <select value={schedule.pack_day_name || NUM_TO_DAY[schedule.pack_day] || schedule.pack_day} onChange={(e) => {
                       handleScheduleUpdate(schedule.id, { pack_day: e.target.value })
                     }}>
                       {DAYS.map(day => (<option key={day} value={day}>{day}</option>))}
@@ -283,7 +285,7 @@ export default function RegionDetail({ regionId, onBack }) {
                   <div className="flow-arrow">→</div>
                   <div className="flow-item">
                     <label>Delivery Day</label>
-                    <select value={schedule.delivery_day_name || schedule.delivery_day} onChange={(e) => {
+                    <select value={schedule.delivery_day_name || NUM_TO_DAY[schedule.delivery_day] || schedule.delivery_day} onChange={(e) => {
                       handleScheduleUpdate(schedule.id, { delivery_day: e.target.value })
                     }}>
                       {DAYS.map(day => (<option key={day} value={day}>{day}</option>))}
