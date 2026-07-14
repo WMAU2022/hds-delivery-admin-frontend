@@ -357,7 +357,7 @@ export default function RegionDetail({ regionId, onBack }) {
                   </div>
                   <div className="flow-arrow">→</div>
                   <div className="flow-item">
-                    <label>Pack Day</label>
+                    <label>Ship Day</label>
                     <select value={getDayName(schedule.pack_day)} onChange={(e) => {
                       handleScheduleUpdate(schedule.id, { pack_day: e.target.value })
                     }}>
@@ -444,7 +444,7 @@ export default function RegionDetail({ regionId, onBack }) {
             <div className="schedule-flow">
               <div className="flow-item"><label>Cutoff Day</label><select value={newSchedule.cutoff_day} onChange={(e) => setNewSchedule({ ...newSchedule, cutoff_day: e.target.value })}>{DAYS.map(day => (<option key={day} value={day}>{day}</option>))}</select></div>
               <div className="flow-arrow">→</div>
-              <div className="flow-item"><label>Pack Day</label><select value={newSchedule.pack_day} onChange={(e) => setNewSchedule({ ...newSchedule, pack_day: e.target.value })}>{DAYS.map(day => (<option key={day} value={day}>{day}</option>))}</select></div>
+              <div className="flow-item"><label>Ship Day</label><select value={newSchedule.pack_day} onChange={(e) => setNewSchedule({ ...newSchedule, pack_day: e.target.value })}>{DAYS.map(day => (<option key={day} value={day}>{day}</option>))}</select></div>
               <div className="flow-arrow">→</div>
               <div className="flow-item"><label>Delivery Day</label><select value={newSchedule.delivery_day} onChange={(e) => setNewSchedule({ ...newSchedule, delivery_day: e.target.value })}>{DAYS.map(day => (<option key={day} value={day}>{day}</option>))}</select></div>
             </div>
