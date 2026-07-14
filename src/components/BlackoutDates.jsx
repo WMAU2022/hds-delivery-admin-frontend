@@ -45,15 +45,21 @@ export default function BlackoutDates() {
       return
     }
 
+    setError(null)
+    setSuccess(null)
     setIsSaving(true)
 
     try {
       const response = await api.post('/blackout-dates', newBlackout)
-      setBlackoutDates([response.data.data, ...blackoutDates])
+      // response.data.data is an array of created dates
+      const createdDates = response.data.data || []
+      setBlackoutDates([...createdDates, ...blackoutDates])
       setNewBlackout({ start_date: '', end_date: '', reason: '' })
       setShowAddForm(false)
-      setSuccess('Blackout date added')
-      setTimeout(() => setSuccess(null), 3000)
+      setSuccess(`Blackout date(s) added (${createdDates.length} dates)`)
+      setTimeout(() => setSuccess(null), 5000)
+      // Refresh to get the latest
+      await fetchBlackoutDates()
     } catch (err) {
       setError(`Failed to add blackout date: ${err.message}`)
     } finally {
@@ -63,7 +69,7 @@ export default function BlackoutDates() {
 
   async function handleToggleBlackout(id) {
     try {
-      const response = await axios.put(`/api/blackout-dates/${id}/toggle`)
+      const response = await api.put(`/blackout-dates/${id}/toggle`, {})
       setBlackoutDates(blackoutDates.map(b => (b.id === id ? response.data.data : b)))
       setSuccess('Blackout date toggled')
       setTimeout(() => setSuccess(null), 3000)
@@ -76,7 +82,7 @@ export default function BlackoutDates() {
     if (!confirm('Delete this blackout date?')) return
 
     try {
-      await axios.delete(`/api/blackout-dates/${id}`)
+      await api.delete(`/blackout-dates/${id}`)
       setBlackoutDates(blackoutDates.filter(b => b.id !== id))
       setSuccess('Blackout date deleted')
       setTimeout(() => setSuccess(null), 3000)
