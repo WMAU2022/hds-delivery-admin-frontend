@@ -144,6 +144,12 @@ body {
   font-size: 14px;
 }
 
+.status-filter {
+  flex: 0 0 auto;
+  background: white;
+  cursor: pointer;
+}
+
 .search-input:focus {
   outline: none;
   border-color: #667eea;
@@ -677,4 +683,96 @@ tr:hover {
     padding: 8px 12px;
     font-size: 12px;
   }
+}
+
+/* Header user / logout */
+.header-with-user {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+}
+
+/* Login */
+.login-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.login-card,
+.modal {
+  background: white;
+  border-radius: 12px;
+  padding: 30px;
+  width: 100%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+}
+
+.login-card h1 {
+  font-size: 22px;
+  color: #333;
+}
+
+.login-card > p {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 12px;
+}
+
+.login-card label,
+.modal label {
+  font-size: 13px;
+  font-weight: 600;
+  margin-top: 6px;
+}
+
+.login-card .btn {
+  margin-top: 16px;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 100;
+}
+
+.modal h3 {
+  font-size: 18px;
+  margin-bottom: 8px;
+}
+
+.modal .modal-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 16px;
 }

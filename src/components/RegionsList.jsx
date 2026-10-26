@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import api from '../api'
 import RegionCard from './RegionCard'
+import AddRegionModal from './AddRegionModal'
 
 export default function RegionsList({ onSelectRegion }) {
   const [regions, setRegions] = useState([])
@@ -8,9 +9,11 @@ export default function RegionsList({ onSelectRegion }) {
   const [error, setError] = useState(null)
   const [success, setSuccess] = useState(null)
   const [searchTerm, setSearchTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState('all') // 'all', 'enabled', 'disabled'
   const [selectedIds, setSelectedIds] = useState(new Set())
   const [bulkActionsVisible, setBulkActionsVisible] = useState(false)
   const [bulkLoading, setBulkLoading] = useState(false)
+  const [showAddModal, setShowAddModal] = useState(false)
 
 
   // Fetch regions on mount
@@ -118,9 +121,11 @@ export default function RegionsList({ onSelectRegion }) {
 
 
 
-  // Filter regions based on search
-  const filteredRegions = regions.filter((r) =>
-    r.name.toLowerCase().includes(searchTerm.toLowerCase())
+  // Filter regions based on search and status
+  const filteredRegions = regions.filter(
+    (r) =>
+      r.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      (statusFilter === 'all' || (statusFilter === 'enabled') === Boolean(r.enabled))
   )
 
   const allSelected = selectedIds.size === regions.length && regions.length > 0
@@ -146,10 +151,33 @@ export default function RegionsList({ onSelectRegion }) {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
-            <button className="btn btn-secondary btn-small">Filter</button>
+            <select
+              className="search-input status-filter"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              aria-label="Filter by status"
+            >
+              <option value="all">All statuses</option>
+              <option value="enabled">Enabled</option>
+              <option value="disabled">Disabled</option>
+            </select>
           </div>
-          <button className="btn btn-primary">+ Add Region</button>
+          <button className="btn btn-primary" onClick={() => setShowAddModal(true)}>
+            + Add Region
+          </button>
         </div>
+
+        {showAddModal && (
+          <AddRegionModal
+            onClose={() => setShowAddModal(false)}
+            onCreated={(region) => {
+              setRegions([...regions, region])
+              setShowAddModal(false)
+              setSuccess(`Region "${region.name}" added`)
+              setTimeout(() => setSuccess(null), 3000)
+            }}
+          />
+        )}
 
         {bulkActionsVisible && (
           <div className="bulk-actions show">
